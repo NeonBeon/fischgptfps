@@ -24,21 +24,6 @@ local function setGreySky()
     lighting.GlobalShadows = false
 end
 
--- Function to remove stars and clouds from the sky
-local function removeStarsAndClouds()
-    -- Find or create a Sky instance in the Lighting service
-    local sky = lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky", lighting)
-    
-    -- Remove stars and clouds by setting the corresponding properties to empty or invisible values
-    sky.StarCount = 0  -- Remove stars
-    sky.SkyboxUp = ""  -- Remove clouds (set all skybox textures to empty)
-    sky.SkyboxDn = ""
-    sky.SkyboxLf = ""
-    sky.SkyboxRt = ""
-    sky.SkyboxFt = ""
-    sky.SkyboxBk = ""
-end
-
 -- Function to remove particles, adjust textures and modify environment settings
 local function modifyEnvironment()
     local decalsyeeted = true
@@ -79,11 +64,22 @@ local function modifyEnvironment()
     end
 end
 
--- Initial setup (remove players, set sky, modify environment, and remove stars/clouds)
+-- Function to set FPS cap to 10
+local function setFpsCapTo10()
+    local success, errorMsg = pcall(function()
+        game:GetService("RunService"):SetFpsCap(10)  -- Set FPS cap to 10
+    end)
+
+    if not success then
+        warn("Failed to set FPS cap: " .. errorMsg)
+    end
+end
+
+-- Initial setup (remove players, set sky, modify environment, set FPS cap)
 removeOtherPlayers()
 setGreySky()
-removeStarsAndClouds()
 modifyEnvironment()
+setFpsCapTo10()  -- Set FPS cap to 10
 
 -- Connect to PlayerAdded to remove new players when they join
 players.PlayerAdded:Connect(function(player)
@@ -101,30 +97,38 @@ workspace.DescendantAdded:Connect(function(obj)
     end
 end)
 
+-- Remove water and other settings
+local g = game
+local w = g.Workspace
+local l = g.Lighting
+local t = w.Terrain
+local players = g:GetService("Players")
+local localPlayer = players.LocalPlayer
+
 -- Function to remove all water by setting all terrain to Air
 local function removeWater()
-    terrain:Clear()  -- Clears all terrain, effectively removing any existing water
+    t:Clear()  -- Clears all terrain, effectively removing any existing water
 end
 
 -- Terrain settings to make it invisible
-terrain.WaterWaveSize = 0
-terrain.WaterWaveSpeed = 0
-terrain.WaterReflectance = 0
-terrain.WaterTransparency = 1        -- Fully transparent water
-terrain.Transparency = 1             -- Fully transparent terrain
-terrain.CastShadow = false           -- No shadows for terrain
+t.WaterWaveSize = 0
+t.WaterWaveSpeed = 0
+t.WaterReflectance = 0
+t.WaterTransparency = 1        -- Fully transparent water
+t.Transparency = 1             -- Fully transparent terrain
+t.CastShadow = false           -- No shadows for terrain
 
 -- Lighting settings to reduce visuals
-lighting.GlobalShadows = false
-lighting.FogEnd = 0                   -- Extreme fog for complete darkness
-lighting.Brightness = 0
+l.GlobalShadows = false
+l.FogEnd = 0                   -- Extreme fog for complete darkness
+l.Brightness = 0
 
 -- Rendering quality setting for a potential FPS boost
 settings().Rendering.QualityLevel = "Level01"
 
 -- Function to hide all objects in the Workspace, except tools in the player's character
 local function hideWorkspaceObjects()
-    for _, v in pairs(workspace:GetDescendants()) do
+    for _, v in pairs(w:GetDescendants()) do
         if v:IsA("BasePart") and v.Parent ~= localPlayer.Character then
             v.Transparency = 1  -- Make parts invisible
             v.CastShadow = false  -- Disable shadows
@@ -161,7 +165,7 @@ hideWorkspaceObjects()
 hideOtherAvatars()
 
 -- Hide newly added objects in the Workspace, excluding tools
-workspace.DescendantAdded:Connect(function(obj)
+w.DescendantAdded:Connect(function(obj)
     if obj:IsA("BasePart") and obj.Parent ~= localPlayer.Character then
         obj.Transparency = 1
         obj.CastShadow = false
@@ -173,7 +177,7 @@ workspace.DescendantAdded:Connect(function(obj)
 end)
 
 -- Disable all post-processing effects for additional visual simplicity
-for _, effect in pairs(lighting:GetChildren()) do
+for _, effect in pairs(l:GetChildren()) do
     if effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") or effect:IsA("ColorCorrectionEffect") 
     or effect:IsA("BloomEffect") or effect:IsA("DepthOfFieldEffect") then
         effect.Enabled = false
