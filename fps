@@ -24,7 +24,38 @@ local function setGreySky()
     lighting.GlobalShadows = false
 end
 
--- Function to remove particles, adjust textures and modify environment settings
+-- Function to modify the player's avatar to a box
+local function setAvatarToBox()
+    local character = localPlayer.Character
+    if character then
+        -- Remove existing body parts
+        for _, part in pairs(character:GetChildren()) do
+            if part:IsA("MeshPart") or part:IsA("Part") then
+                part:Destroy()
+            end
+        end
+
+        -- Create new box parts for the character
+        local humanoidRootPart = Instance.new("Part")
+        humanoidRootPart.Size = Vector3.new(2, 5, 2)  -- Size of the box
+        humanoidRootPart.Position = character.HumanoidRootPart.Position
+        humanoidRootPart.Anchored = false
+        humanoidRootPart.CanCollide = false
+        humanoidRootPart.Name = "HumanoidRootPart"
+        humanoidRootPart.Parent = character
+        
+        -- Create a humanoid to allow basic functionality
+        local humanoid = Instance.new("Humanoid")
+        humanoid.Parent = character
+
+        -- Set the character to be a box
+        local boxMesh = Instance.new("SpecialMesh")
+        boxMesh.MeshType = Enum.MeshType.Brick
+        boxMesh.Parent = humanoidRootPart
+    end
+end
+
+-- Function to modify environment settings (without the grey sky)
 local function modifyEnvironment()
     local decalsyeeted = true
     terrain.WaterWaveSize = 0
@@ -69,10 +100,17 @@ removeOtherPlayers()
 setGreySky()
 modifyEnvironment()
 
+-- Set local player avatar to a box
+setAvatarToBox()
+
 -- Connect to PlayerAdded to remove new players when they join
 players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         removeOtherPlayers()
+        -- Set new player's avatar to a box
+        if player == localPlayer then
+            setAvatarToBox()
+        end
     end)
 end)
 
