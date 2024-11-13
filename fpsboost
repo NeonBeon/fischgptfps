@@ -4,6 +4,17 @@ local lighting = game:GetService("Lighting")
 local workspace = game.Workspace
 local terrain = workspace.Terrain
 
+-- Function to remove the waterfall
+local function removeWaterfall()
+    local waterfall = game:GetService("Workspace").world.map["Forsaken Shores"].Waterfall
+    if waterfall then
+        waterfall:Destroy()
+        print("Waterfall removed.")
+    else
+        print("Waterfall not found.")
+    end
+end
+
 -- Function to remove all other players' characters
 local function removeOtherPlayers()
     for _, player in ipairs(players:GetPlayers()) do
@@ -26,10 +37,7 @@ end
 
 -- Function to remove stars and clouds from the sky
 local function removeStarsAndClouds()
-    -- Find or create a Sky instance in the Lighting service
     local sky = lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky", lighting)
-    
-    -- Remove stars and clouds by setting the corresponding properties to empty or invisible values
     sky.StarCount = 0  -- Remove stars
     sky.SkyboxUp = ""  -- Remove clouds (set all skybox textures to empty)
     sky.SkyboxDn = ""
@@ -41,7 +49,6 @@ end
 
 -- Function to remove particles, adjust textures and modify environment settings
 local function modifyEnvironment()
-    local decalsyeeted = true
     terrain.WaterWaveSize = 0
     terrain.WaterWaveSpeed = 0
     terrain.WaterReflectance = 0
@@ -79,7 +86,7 @@ local function modifyEnvironment()
     end
 end
 
--- Initial setup (remove players, set sky, modify environment, and remove stars/clouds)
+-- Initial setup (remove players, set sky, modify environment, remove stars/clouds)
 removeOtherPlayers()
 setGreySky()
 removeStarsAndClouds()
@@ -179,3 +186,6 @@ for _, effect in pairs(lighting:GetChildren()) do
         effect.Enabled = false
     end
 end
+
+-- Remove the waterfall at the start
+removeWaterfall()
