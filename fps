@@ -1,13 +1,9 @@
--- Roblox environment setup to limit FPS and remove other features
-
+-- Roblox environment setup (without FPS cap on execution)
 local players = game:GetService("Players")
 local localPlayer = players.LocalPlayer
 local lighting = game:GetService("Lighting")
 local workspace = game.Workspace
 local terrain = workspace.Terrain
-
--- Set FPS to 10
-setfpscap(10)
 
 -- Function to remove all other players' characters
 local function removeOtherPlayers()
@@ -76,18 +72,43 @@ removeOtherPlayers()
 setGreySky()
 modifyEnvironment()
 
--- Connect PlayerAdded to remove new players when they join
-players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function()
-        removeOtherPlayers()
-    end)
-end)
+-- Function to set FPS cap
+local function setFPSCap(fps)
+    setfpscap(fps)
+end
 
--- Connect to DescendantAdded to handle new objects and particles
-workspace.DescendantAdded:Connect(function(obj)
-    if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-        obj:Destroy()
-    elseif obj:IsA("Decal") or obj:IsA("Texture") then
-        obj.Transparency = 1  -- Hide new decals/textures
+-- GUI Setup for FPS Cap Control
+local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Orion/main/source'))()
+local Window = OrionLib:MakeWindow({
+    Name = "FPS Cap Control",
+    HidePremium = true,
+    SaveConfig = true,
+    ConfigFolder = "fpscap"
+})
+
+local MainTab = Window:MakeTab({
+    Name = "FPS Control",
+    Icon = "",
+    PremiumOnly = false
+})
+
+-- Add buttons for setting FPS to 10 and 60
+MainTab:AddButton({
+    Name = "Set FPS to 10",
+    Callback = function()
+        setFPSCap(10)
     end
-end)
+})
+
+MainTab:AddButton({
+    Name = "Set FPS to 60",
+    Callback = function()
+        setFPSCap(60)
+    end
+})
+
+-- Teleport player to specific coordinates when executed
+local character = localPlayer.Character
+if character and character:FindFirstChild("HumanoidRootPart") then
+    character.HumanoidRootPart.CFrame = CFrame.new(-2765, 237, 1740)  -- Teleport position
+end
