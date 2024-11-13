@@ -24,21 +24,6 @@ local function setGreySky()
     lighting.GlobalShadows = false
 end
 
--- Function to remove stars and clouds from the sky
-local function removeStarsAndClouds()
-    -- Find or create a Sky instance in the Lighting service
-    local sky = lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky", lighting)
-    
-    -- Remove stars and clouds by setting the corresponding properties to empty or invisible values
-    sky.StarCount = 0  -- Remove stars
-    sky.SkyboxUp = ""  -- Remove clouds (set all skybox textures to empty)
-    sky.SkyboxDn = ""
-    sky.SkyboxLf = ""
-    sky.SkyboxRt = ""
-    sky.SkyboxFt = ""
-    sky.SkyboxBk = ""
-end
-
 -- Function to remove particles, adjust textures and modify environment settings
 local function modifyEnvironment()
     local decalsyeeted = true
@@ -79,48 +64,10 @@ local function modifyEnvironment()
     end
 end
 
--- Initial setup (remove players, set sky, modify environment, and remove stars/clouds)
-removeOtherPlayers()
-setGreySky()
-removeStarsAndClouds()
-modifyEnvironment()
-
--- Connect to PlayerAdded to remove new players when they join
-players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function()
-        removeOtherPlayers()
-    end)
-end)
-
--- Connect to DescendantAdded to handle new objects and particles
-workspace.DescendantAdded:Connect(function(obj)
-    if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-        obj:Destroy()
-    elseif obj:IsA("Decal") or obj:IsA("Texture") then
-        obj.Transparency = 1  -- Hide new decals/textures
-    end
-end)
-
 -- Function to remove all water by setting all terrain to Air
 local function removeWater()
     terrain:Clear()  -- Clears all terrain, effectively removing any existing water
 end
-
--- Terrain settings to make it invisible
-terrain.WaterWaveSize = 0
-terrain.WaterWaveSpeed = 0
-terrain.WaterReflectance = 0
-terrain.WaterTransparency = 1        -- Fully transparent water
-terrain.Transparency = 1             -- Fully transparent terrain
-terrain.CastShadow = false           -- No shadows for terrain
-
--- Lighting settings to reduce visuals
-lighting.GlobalShadows = false
-lighting.FogEnd = 0                   -- Extreme fog for complete darkness
-lighting.Brightness = 0
-
--- Rendering quality setting for a potential FPS boost
-settings().Rendering.QualityLevel = "Level01"
 
 -- Function to hide all objects in the Workspace, except tools in the player's character
 local function hideWorkspaceObjects()
@@ -148,6 +95,14 @@ local function hideOtherAvatars()
     end
 end
 
+-- Initial setup (remove players, set sky, modify environment, remove water, hide workspace objects)
+removeOtherPlayers()
+setGreySky()
+modifyEnvironment()
+removeWater()  -- Remove water from the terrain
+hideWorkspaceObjects()
+hideOtherAvatars()
+
 -- Connect PlayerAdded to hide avatars when new players join
 players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
@@ -155,12 +110,7 @@ players.PlayerAdded:Connect(function(player)
     end)
 end)
 
--- Initial calls to hide everything, remove water, and hide other avatars
-removeWater()
-hideWorkspaceObjects()
-hideOtherAvatars()
-
--- Hide newly added objects in the Workspace, excluding tools
+-- Connect to DescendantAdded to handle new objects and particles
 workspace.DescendantAdded:Connect(function(obj)
     if obj:IsA("BasePart") and obj.Parent ~= localPlayer.Character then
         obj.Transparency = 1
