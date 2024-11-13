@@ -13,18 +13,7 @@ local function removeOtherPlayers()
     end
 end
 
--- Function to set up a grey sky without grey textures
-local function setGreySky()
-    local sky = lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky", lighting)
-    sky.SkyboxUp, sky.SkyboxDn, sky.SkyboxLf, sky.SkyboxRt, sky.SkyboxFt, sky.SkyboxBk = "", "", "", "", "", ""
-    sky.SunAngularSize, sky.MoonAngularSize = 0, 0
-    lighting.Ambient = Color3.new(0.5, 0.5, 0.5)
-    lighting.OutdoorAmbient = Color3.new(0.5, 0.5, 0.5)
-    lighting.Brightness = 0
-    lighting.GlobalShadows = false
-end
-
--- Function to remove particles, adjust textures and modify environment settings
+-- Function to modify environment settings (without the grey sky)
 local function modifyEnvironment()
     local decalsyeeted = true
     terrain.WaterWaveSize = 0
@@ -36,9 +25,10 @@ local function modifyEnvironment()
     lighting.Brightness = 0
     settings().Rendering.QualityLevel = "Level01"
 
+    -- Handle all the descendants in the workspace
     for _, obj in pairs(workspace:GetDescendants()) do
         if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-            obj:Destroy()
+            obj:Destroy()  -- Immediately remove any existing particle emitters or trails
         elseif obj:IsA("Decal") or obj:IsA("Texture") then
             obj.Transparency = 1  -- Hide decals/textures
         elseif obj:IsA("Part") or obj:IsA("Union") or obj:IsA("CornerWedgePart") or obj:IsA("TrussPart") then
@@ -64,23 +54,24 @@ local function modifyEnvironment()
     end
 end
 
--- Initial setup (remove players, set sky, modify environment)
+-- Function to continually remove particles or trails as they are added
+local function removeNewParticles()
+    -- Continuously check for any new particle emitters or trails
+    workspace.DescendantAdded:Connect(function(obj)
+        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+            obj:Destroy()  -- Destroy them immediately
+        end
+    end)
+end
+
+-- Initial setup (remove players, modify environment)
 removeOtherPlayers()
-setGreySky()
 modifyEnvironment()
+removeNewParticles()
 
 -- Connect to PlayerAdded to remove new players when they join
 players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         removeOtherPlayers()
     end)
-end)
-
--- Connect to DescendantAdded to handle new objects and particles
-workspace.DescendantAdded:Connect(function(obj)
-    if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-        obj:Destroy()
-    elseif obj:IsA("Decal") or obj:IsA("Texture") then
-        obj.Transparency = 1  -- Hide new decals/textures
-    end
 end)
