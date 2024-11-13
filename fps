@@ -13,7 +13,18 @@ local function removeOtherPlayers()
     end
 end
 
--- Function to modify environment settings (without the grey sky)
+-- Function to set up a grey sky without grey textures
+local function setGreySky()
+    local sky = lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky", lighting)
+    sky.SkyboxUp, sky.SkyboxDn, sky.SkyboxLf, sky.SkyboxRt, sky.SkyboxFt, sky.SkyboxBk = "", "", "", "", "", ""
+    sky.SunAngularSize, sky.MoonAngularSize = 0, 0
+    lighting.Ambient = Color3.new(0.5, 0.5, 0.5)
+    lighting.OutdoorAmbient = Color3.new(0.5, 0.5, 0.5)
+    lighting.Brightness = 0
+    lighting.GlobalShadows = false
+end
+
+-- Function to remove particles, adjust textures and modify environment settings
 local function modifyEnvironment()
     local decalsyeeted = true
     terrain.WaterWaveSize = 0
@@ -53,8 +64,9 @@ local function modifyEnvironment()
     end
 end
 
--- Initial setup (remove players, modify environment)
+-- Initial setup (remove players, set sky, modify environment)
 removeOtherPlayers()
+setGreySky()
 modifyEnvironment()
 
 -- Connect to PlayerAdded to remove new players when they join
