@@ -67,11 +67,6 @@ local function modifyEnvironment()
     end
 end
 
--- Initial setup (remove players, set sky, modify environment)
-removeOtherPlayers()
-setGreySky()
-modifyEnvironment()
-
 -- Function to set FPS cap
 local function setFPSCap(fps)
     setfpscap(fps)
@@ -107,8 +102,16 @@ MainTab:AddButton({
     end
 })
 
--- Teleport player to specific coordinates when executed
+-- Teleport player to specific coordinates, then wait for 5 seconds
 local character = localPlayer.Character
 if character and character:FindFirstChild("HumanoidRootPart") then
     character.HumanoidRootPart.CFrame = CFrame.new(-2765, 237, 1740)  -- Teleport position
 end
+
+-- Wait for 5 seconds before executing the rest of the script
+wait(5)
+
+-- After the wait, execute the environment setup and the rest
+removeOtherPlayers()
+setGreySky()
+modifyEnvironment()
