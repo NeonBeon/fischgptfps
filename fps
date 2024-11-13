@@ -71,10 +71,21 @@ local function cleanupButtonImprints()
     end)
 end
 
--- Initial setup (remove players, modify environment)
+-- Function to remove fish models immediately when they are spawned
+local function removeFish()
+    workspace.DescendantAdded:Connect(function(obj)
+        -- If the object is a fish model or part (you can customize this condition)
+        if obj:IsA("Model") and obj:FindFirstChild("FishMesh") then  -- Assuming the fish has a mesh named "FishMesh"
+            obj:Destroy()  -- Immediately remove the fish model
+        end
+    end)
+end
+
+-- Initial setup (remove players, modify environment, remove fish)
 removeOtherPlayers()
 modifyEnvironment()
 cleanupButtonImprints()
+removeFish()
 
 -- Connect to PlayerAdded to remove new players when they join
 players.PlayerAdded:Connect(function(player)
