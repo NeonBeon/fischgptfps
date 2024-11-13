@@ -3,7 +3,6 @@ local localPlayer = players.LocalPlayer
 local lighting = game:GetService("Lighting")
 local workspace = game.Workspace
 local terrain = workspace.Terrain
-local camera = game.Workspace.CurrentCamera
 
 -- Function to remove all other players' characters
 local function removeOtherPlayers()
@@ -14,49 +13,16 @@ local function removeOtherPlayers()
     end
 end
 
--- Function to change avatar to a box
-local function changeAvatarToBox(player)
-    local character = player.Character
-    if character then
-        -- Wait for the character to load properly before making changes
-        character:WaitForChild("HumanoidRootPart", 10)
-        character:WaitForChild("Humanoid", 10)
-
-        -- Remove all existing parts from the character
-        for _, part in ipairs(character:GetChildren()) do
-            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                part:Destroy()
-            end
-        end
-
-        -- Create a simple box as the new avatar
-        local box = Instance.new("Part")
-        box.Size = Vector3.new(2, 5, 2)  -- You can adjust the size as needed
-        box.Position = character.HumanoidRootPart.Position
-        box.Anchored = false
-        box.CanCollide = false
-        box.Name = "BoxAvatar"
-        box.Parent = character
-        
-        -- Create a humanoid for the box avatar
-        local humanoid = Instance.new("Humanoid")
-        humanoid.Parent = character
-        humanoid.Health = 100  -- Set a default health value
-        
-        -- Parent the box to the HumanoidRootPart to ensure it moves with the character
-        box.CFrame = character.HumanoidRootPart.CFrame
-    end
-end
-
 -- Function to modify environment settings (without the grey sky)
 local function modifyEnvironment()
     local decalsyeeted = true
     terrain.WaterWaveSize = 0
     terrain.WaterWaveSpeed = 0
     terrain.WaterReflectance = 0
-    terrain.WaterTransparency = 1  -- Set water transparency to 1 (effectively hides it)
+    terrain.WaterTransparency = 1  -- Make water fully transparent
+    terrain:ClearWater()  -- Remove any water features in the terrain
     lighting.GlobalShadows = false
-    lighting.FogEnd = 200  -- Reduce render distance (you can adjust this value)
+    lighting.FogEnd = 9e9
     lighting.Brightness = 0
     settings().Rendering.QualityLevel = "Level01"
 
@@ -88,19 +54,14 @@ local function modifyEnvironment()
     end
 end
 
--- Initial setup (remove players, modify environment, change avatar)
+-- Initial setup (remove players, modify environment)
 removeOtherPlayers()
 modifyEnvironment()
-
--- Change local player's avatar to a box
-changeAvatarToBox(localPlayer)
 
 -- Connect to PlayerAdded to remove new players when they join
 players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         removeOtherPlayers()
-        -- Change the new player's avatar to a box
-        changeAvatarToBox(player)
     end)
 end)
 
