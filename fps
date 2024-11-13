@@ -3,7 +3,7 @@ local localPlayer = players.LocalPlayer
 local lighting = game:GetService("Lighting")
 local workspace = game.Workspace
 local terrain = workspace.Terrain
-local gui = localPlayer:WaitForChild("PlayerGui")
+local camera = game.Workspace.CurrentCamera
 
 -- Function to remove all other players' characters
 local function removeOtherPlayers()
@@ -14,21 +14,47 @@ local function removeOtherPlayers()
     end
 end
 
+-- Function to change avatar to a box
+local function changeAvatarToBox(player)
+    local character = player.Character
+    if character then
+        -- Remove all existing parts from the character
+        for _, part in ipairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part:Destroy()
+            end
+        end
+        
+        -- Create a simple box as the new avatar
+        local box = Instance.new("Part")
+        box.Size = Vector3.new(2, 5, 2)  -- You can adjust the size as needed
+        box.Position = character.HumanoidRootPart.Position
+        box.Anchored = false
+        box.CanCollide = false
+        box.Name = "BoxAvatar"
+        box.Parent = character
+        
+        -- Create a humanoid for the box avatar
+        local humanoid = Instance.new("Humanoid")
+        humanoid.Parent = character
+    end
+end
+
 -- Function to modify environment settings (without the grey sky)
 local function modifyEnvironment()
+    local decalsyeeted = true
     terrain.WaterWaveSize = 0
     terrain.WaterWaveSpeed = 0
     terrain.WaterReflectance = 0
-    terrain.WaterTransparency = 0
+    terrain.WaterTransparency = 1  -- Set water transparency to 1 (effectively hides it)
     lighting.GlobalShadows = false
-    lighting.FogEnd = 9e9
+    lighting.FogEnd = 200  -- Reduce render distance (you can adjust this value)
     lighting.Brightness = 0
     settings().Rendering.QualityLevel = "Level01"
 
-    -- Handle all the descendants in the workspace
     for _, obj in pairs(workspace:GetDescendants()) do
         if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-            obj:Destroy()  -- Immediately remove any existing particle emitters or trails
+            obj:Destroy()
         elseif obj:IsA("Decal") or obj:IsA("Texture") then
             obj.Transparency = 1  -- Hide decals/textures
         elseif obj:IsA("Part") or obj:IsA("Union") or obj:IsA("CornerWedgePart") or obj:IsA("TrussPart") then
@@ -54,49 +80,27 @@ local function modifyEnvironment()
     end
 end
 
--- Function to handle button click imprint cleanup
-local function cleanupButtonImprints()
-    -- Clean up button click effects if any (for UI buttons)
-    gui.DescendantAdded:Connect(function(child)
-        if child:IsA("TextButton") or child:IsA("ImageButton") then
-            child.MouseButton1Click:Connect(function()
-                -- Remove any lingering visual effects or imprints
-                for _, effect in pairs(child:GetDescendants()) do
-                    if effect:IsA("ParticleEmitter") or effect:IsA("Trail") then
-                        effect:Destroy()  -- Destroy particle effects
-                    end
-                end
-            end)
-        end
-    end)
-end
-
--- Function to remove fish models immediately when they are spawned
-local function removeFish()
-    workspace.DescendantAdded:Connect(function(obj)
-        -- If the object is a fish model or part (you can customize this condition)
-        if obj:IsA("Model") and obj:FindFirstChild("FishMesh") then  -- Assuming the fish has a mesh named "FishMesh"
-            obj:Destroy()  -- Immediately remove the fish model
-        end
-    end)
-end
-
--- Initial setup (remove players, modify environment, remove fish)
+-- Initial setup (remove players, modify environment, change avatar)
 removeOtherPlayers()
 modifyEnvironment()
-cleanupButtonImprints()
-removeFish()
+
+-- Change local player's avatar to a box
+changeAvatarToBox(localPlayer)
 
 -- Connect to PlayerAdded to remove new players when they join
 players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         removeOtherPlayers()
+        -- Change the new player's avatar to a box
+        changeAvatarToBox(player)
     end)
 end)
 
 -- Connect to DescendantAdded to handle new objects and particles
 workspace.DescendantAdded:Connect(function(obj)
     if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-        obj:Destroy()  -- Destroy new particles immediately
+        obj:Destroy()
+    elseif obj:IsA("Decal") or obj:IsA("Texture") then
+        obj.Transparency = 1  -- Hide new decals/textures
     end
 end)
