@@ -18,13 +18,17 @@ end
 local function changeAvatarToBox(player)
     local character = player.Character
     if character then
+        -- Wait for the character to load properly before making changes
+        character:WaitForChild("HumanoidRootPart", 10)
+        character:WaitForChild("Humanoid", 10)
+
         -- Remove all existing parts from the character
         for _, part in ipairs(character:GetChildren()) do
-            if part:IsA("BasePart") then
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
                 part:Destroy()
             end
         end
-        
+
         -- Create a simple box as the new avatar
         local box = Instance.new("Part")
         box.Size = Vector3.new(2, 5, 2)  -- You can adjust the size as needed
@@ -37,6 +41,10 @@ local function changeAvatarToBox(player)
         -- Create a humanoid for the box avatar
         local humanoid = Instance.new("Humanoid")
         humanoid.Parent = character
+        humanoid.Health = 100  -- Set a default health value
+        
+        -- Parent the box to the HumanoidRootPart to ensure it moves with the character
+        box.CFrame = character.HumanoidRootPart.CFrame
     end
 end
 
