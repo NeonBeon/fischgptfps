@@ -1,3 +1,58 @@
+-- Load OrionLib (GUI library)
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+
+-- Create the GUI window
+local Window = OrionLib:MakeWindow({
+    Name = "FPS Cap",
+    HidePremium = true,
+    SaveConfig = true,
+    ConfigFolder = "fpscap"
+})
+
+-- Create the "Main" tab
+local MainW = Window:MakeTab({
+    Name = "Main",
+    Icon = "",
+    PremiumOnly = false
+})
+
+-- Display the notification with credit info
+OrionLib:MakeNotification({
+    Name = "FPS Cap",
+    Content = "Code - stonifam5@github\nUI - Sirius@v3rm",
+    Image = "",
+    Time = 5
+})
+
+-- Add a button to set FPS to 10
+MainW:AddButton({
+    Name = "Set FPS to 10",
+    Callback = function()
+        setfpscap(10)  -- Set the FPS cap to 10
+    end    
+})
+
+-- Add a button to set FPS to 60
+MainW:AddButton({
+    Name = "Set FPS to 60",
+    Callback = function()
+        setfpscap(60)  -- Set the FPS cap to 60
+    end    
+})
+
+-- Function to set the FPS cap
+local function setfpscap(fps)
+    local success, errorMsg = pcall(function()
+        game:GetService("RunService"):SetFpsCap(fps)  -- Set FPS cap to the desired value
+    end)
+
+    if not success then
+        warn("Failed to set FPS cap: " .. errorMsg)  -- Warn if setting FPS cap fails
+    end
+end
+
+-- Your other game setup code below
+
 local players = game:GetService("Players")
 local localPlayer = players.LocalPlayer
 local lighting = game:GetService("Lighting")
@@ -26,7 +81,6 @@ end
 
 -- Function to remove particles, adjust textures and modify environment settings
 local function modifyEnvironment()
-    local decalsyeeted = true
     terrain.WaterWaveSize = 0
     terrain.WaterWaveSpeed = 0
     terrain.WaterReflectance = 0
@@ -64,22 +118,10 @@ local function modifyEnvironment()
     end
 end
 
--- Function to set FPS cap to 10
-local function setFpsCapTo10()
-    local success, errorMsg = pcall(function()
-        game:GetService("RunService"):SetFpsCap(10)  -- Set FPS cap to 10
-    end)
-
-    if not success then
-        warn("Failed to set FPS cap: " .. errorMsg)
-    end
-end
-
 -- Initial setup (remove players, set sky, modify environment, set FPS cap)
 removeOtherPlayers()
 setGreySky()
 modifyEnvironment()
-setFpsCapTo10()  -- Set FPS cap to 10
 
 -- Connect to PlayerAdded to remove new players when they join
 players.PlayerAdded:Connect(function(player)
@@ -96,90 +138,3 @@ workspace.DescendantAdded:Connect(function(obj)
         obj.Transparency = 1  -- Hide new decals/textures
     end
 end)
-
--- Remove water and other settings
-local g = game
-local w = g.Workspace
-local l = g.Lighting
-local t = w.Terrain
-local players = g:GetService("Players")
-local localPlayer = players.LocalPlayer
-
--- Function to remove all water by setting all terrain to Air
-local function removeWater()
-    t:Clear()  -- Clears all terrain, effectively removing any existing water
-end
-
--- Terrain settings to make it invisible
-t.WaterWaveSize = 0
-t.WaterWaveSpeed = 0
-t.WaterReflectance = 0
-t.WaterTransparency = 1        -- Fully transparent water
-t.Transparency = 1             -- Fully transparent terrain
-t.CastShadow = false           -- No shadows for terrain
-
--- Lighting settings to reduce visuals
-l.GlobalShadows = false
-l.FogEnd = 0                   -- Extreme fog for complete darkness
-l.Brightness = 0
-
--- Rendering quality setting for a potential FPS boost
-settings().Rendering.QualityLevel = "Level01"
-
--- Function to hide all objects in the Workspace, except tools in the player's character
-local function hideWorkspaceObjects()
-    for _, v in pairs(w:GetDescendants()) do
-        if v:IsA("BasePart") and v.Parent ~= localPlayer.Character then
-            v.Transparency = 1  -- Make parts invisible
-            v.CastShadow = false  -- Disable shadows
-        elseif v:IsA("Decal") or v:IsA("Texture") then
-            v.Transparency = 1  -- Hide all decals and textures
-        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-            v.Enabled = false  -- Turn off particles and trails
-        elseif v:IsA("MeshPart") and v.Parent ~= localPlayer.Character then
-            v.Transparency = 1
-            v.CastShadow = false
-        end
-    end
-end
-
--- Function to hide other players' avatars, but not the local player
-local function hideOtherAvatars()
-    for _, player in ipairs(players:GetPlayers()) do
-        if player ~= localPlayer and player.Character then
-            player.Character:Destroy()  -- Remove the character model of other players
-        end
-    end
-end
-
--- Connect PlayerAdded to hide avatars when new players join
-players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function()
-        hideOtherAvatars()
-    end)
-end)
-
--- Initial calls to hide everything, remove water, and hide other avatars
-removeWater()
-hideWorkspaceObjects()
-hideOtherAvatars()
-
--- Hide newly added objects in the Workspace, excluding tools
-w.DescendantAdded:Connect(function(obj)
-    if obj:IsA("BasePart") and obj.Parent ~= localPlayer.Character then
-        obj.Transparency = 1
-        obj.CastShadow = false
-    elseif obj:IsA("Decal") or obj:IsA("Texture") then
-        obj.Transparency = 1
-    elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-        obj.Enabled = false
-    end
-end)
-
--- Disable all post-processing effects for additional visual simplicity
-for _, effect in pairs(l:GetChildren()) do
-    if effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") or effect:IsA("ColorCorrectionEffect") 
-    or effect:IsA("BloomEffect") or effect:IsA("DepthOfFieldEffect") then
-        effect.Enabled = false
-    end
-end
