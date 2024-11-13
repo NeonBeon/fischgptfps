@@ -6,7 +6,7 @@ local lighting = game:GetService("Lighting")
 local workspace = game.Workspace
 local terrain = workspace.Terrain
 
--- Set FPS to 10
+-- Set FPS to 10 (Ensure this is working on your client)
 setfpscap(10)
 
 -- Function to remove all other players' characters
@@ -43,6 +43,7 @@ local function modifyEnvironment()
     lighting.Brightness = 0
     settings().Rendering.QualityLevel = "Level01"
 
+    -- Destroy particles, decals, and modify parts
     for _, obj in pairs(workspace:GetDescendants()) do
         if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
             obj:Destroy()
@@ -63,7 +64,7 @@ local function modifyEnvironment()
         end
     end
 
-    -- Disable visual effects
+    -- Disable visual effects like blur, sun rays, color correction, etc.
     for _, effect in pairs(lighting:GetChildren()) do
         if effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") or effect:IsA("ColorCorrectionEffect") or effect:IsA("BloomEffect") or effect:IsA("DepthOfFieldEffect") then
             effect.Enabled = false
