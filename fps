@@ -3,6 +3,7 @@ local localPlayer = players.LocalPlayer
 local lighting = game:GetService("Lighting")
 local workspace = game.Workspace
 local terrain = workspace.Terrain
+local gui = localPlayer:WaitForChild("PlayerGui")
 
 -- Function to remove all other players' characters
 local function removeOtherPlayers()
@@ -15,7 +16,6 @@ end
 
 -- Function to modify environment settings (without the grey sky)
 local function modifyEnvironment()
-    local decalsyeeted = true
     terrain.WaterWaveSize = 0
     terrain.WaterWaveSpeed = 0
     terrain.WaterReflectance = 0
@@ -54,12 +54,19 @@ local function modifyEnvironment()
     end
 end
 
--- Function to continually remove particles or trails as they are added
-local function removeNewParticles()
-    -- Continuously check for any new particle emitters or trails
-    workspace.DescendantAdded:Connect(function(obj)
-        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-            obj:Destroy()  -- Destroy them immediately
+-- Function to handle button click imprint cleanup
+local function cleanupButtonImprints()
+    -- Clean up button click effects if any (for UI buttons)
+    gui.DescendantAdded:Connect(function(child)
+        if child:IsA("TextButton") or child:IsA("ImageButton") then
+            child.MouseButton1Click:Connect(function()
+                -- Remove any lingering visual effects or imprints
+                for _, effect in pairs(child:GetDescendants()) do
+                    if effect:IsA("ParticleEmitter") or effect:IsA("Trail") then
+                        effect:Destroy()  -- Destroy particle effects
+                    end
+                end
+            end)
         end
     end)
 end
@@ -67,11 +74,18 @@ end
 -- Initial setup (remove players, modify environment)
 removeOtherPlayers()
 modifyEnvironment()
-removeNewParticles()
+cleanupButtonImprints()
 
 -- Connect to PlayerAdded to remove new players when they join
 players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         removeOtherPlayers()
     end)
+end)
+
+-- Connect to DescendantAdded to handle new objects and particles
+workspace.DescendantAdded:Connect(function(obj)
+    if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+        obj:Destroy()  -- Destroy new particles immediately
+    end
 end)
