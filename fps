@@ -19,8 +19,7 @@ local function modifyEnvironment()
     terrain.WaterWaveSize = 0
     terrain.WaterWaveSpeed = 0
     terrain.WaterReflectance = 0
-    terrain.WaterTransparency = 1  -- Make water fully transparent
-    terrain:ClearWater()  -- Remove any water features in the terrain
+    terrain.WaterTransparency = 0
     lighting.GlobalShadows = false
     lighting.FogEnd = 9e9
     lighting.Brightness = 0
