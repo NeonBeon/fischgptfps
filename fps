@@ -1,63 +1,13 @@
--- Load OrionLib (GUI library)
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-
--- Create the GUI window
-local Window = OrionLib:MakeWindow({
-    Name = "FPS Cap",
-    HidePremium = true,
-    SaveConfig = true,
-    ConfigFolder = "fpscap"
-})
-
--- Create the "Main" tab
-local MainW = Window:MakeTab({
-    Name = "Main",
-    Icon = "",
-    PremiumOnly = false
-})
-
--- Display the notification with credit info
-OrionLib:MakeNotification({
-    Name = "FPS Cap",
-    Content = "Code - stonifam5@github\nUI - Sirius@v3rm",
-    Image = "",
-    Time = 5
-})
-
--- Add a button to set FPS to 10
-MainW:AddButton({
-    Name = "Set FPS to 10",
-    Callback = function()
-        setfpscap(10)  -- Set the FPS cap to 10
-    end    
-})
-
--- Add a button to set FPS to 60
-MainW:AddButton({
-    Name = "Set FPS to 60",
-    Callback = function()
-        setfpscap(60)  -- Set the FPS cap to 60
-    end    
-})
-
--- Function to set the FPS cap
-local function setfpscap(fps)
-    local success, errorMsg = pcall(function()
-        game:GetService("RunService"):SetFpsCap(fps)  -- Set FPS cap to the desired value
-    end)
-
-    if not success then
-        warn("Failed to set FPS cap: " .. errorMsg)  -- Warn if setting FPS cap fails
-    end
-end
-
--- Your other game setup code below
+-- Roblox environment setup to limit FPS and remove other features
 
 local players = game:GetService("Players")
 local localPlayer = players.LocalPlayer
 local lighting = game:GetService("Lighting")
 local workspace = game.Workspace
 local terrain = workspace.Terrain
+
+-- Set FPS to 10
+setfpscap(10)
 
 -- Function to remove all other players' characters
 local function removeOtherPlayers()
@@ -84,7 +34,10 @@ local function modifyEnvironment()
     terrain.WaterWaveSize = 0
     terrain.WaterWaveSpeed = 0
     terrain.WaterReflectance = 0
-    terrain.WaterTransparency = 0
+    terrain.WaterTransparency = 1        -- Fully transparent water
+    terrain.Transparency = 1             -- Fully transparent terrain
+    terrain.CastShadow = false           -- No shadows for terrain
+
     lighting.GlobalShadows = false
     lighting.FogEnd = 9e9
     lighting.Brightness = 0
@@ -118,12 +71,12 @@ local function modifyEnvironment()
     end
 end
 
--- Initial setup (remove players, set sky, modify environment, set FPS cap)
+-- Initial setup (remove players, set sky, modify environment)
 removeOtherPlayers()
 setGreySky()
 modifyEnvironment()
 
--- Connect to PlayerAdded to remove new players when they join
+-- Connect PlayerAdded to remove new players when they join
 players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         removeOtherPlayers()
